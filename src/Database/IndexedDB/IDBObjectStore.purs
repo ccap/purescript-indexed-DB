@@ -11,6 +11,7 @@ module Database.IndexedDB.IDBObjectStore
   , createIndex
   , delete
   , deleteIndex
+  , get
   , index
   , put
 
@@ -30,12 +31,12 @@ import Database.IndexedDB.Core
 import Data.Function.Uncurried (Fn2, Fn3, Fn4)
 import Data.Function.Uncurried as Fn
 import Data.Maybe (Maybe)
-import Data.Nullable (Nullable, toNullable)
-import Database.IndexedDB.IDBIndex (count, get, getAllKeys, getKey, openCursor, openKeyCursor)
+import Data.Nullable (Nullable, toMaybe, toNullable)
+import Database.IndexedDB.IDBIndex (count, getAllKeys, getKey, openCursor, openKeyCursor)
 import Database.IndexedDB.IDBKey.Internal (class IDBKey, Key, unsafeFromKey, toKey)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
-import Foreign (Foreign)
+import Foreign (Foreign, unsafeFromForeign)
 import Prelude (Unit, map, ($), (<$>), (>>>), (<<<))
 
 --------------------
@@ -149,6 +150,16 @@ index
 index store name' =
   fromEffectFnAff $ Fn.runFn2 _index store name'
 
+-- | Gets a record in store with the given key
+get ::
+  forall val store
+  . IDBObjectStore store
+  => store
+  -> KeyRange
+  -> Aff (Maybe val)
+get store key =
+  map (toMaybe >>> map unsafeFromForeign) (fromEffectFnAff $ Fn.runFn2 _get store key)
+
 -- | Adds or updates a record in store with the given value and key.
 -- |
 -- | If the store uses in-line keys and key is specified a "DataError" DOMException
@@ -247,6 +258,10 @@ foreign import _keyPath
 foreign import _name
   :: ObjectStore
   -> String
+
+foreign import _get
+  :: forall store
+   . Fn2 store KeyRange (EffectFnAff (Nullable Foreign))
 
 foreign import _put
   :: forall val store
