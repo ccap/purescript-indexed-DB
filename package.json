@@ -9,7 +9,9 @@
     "test": "spago build && node index.js"
   },
   "dependencies": {
-    "fake-indexeddb": "^4.0.1"
+    "fake-indexeddb": "^4.0.1",
+    "spago": "^0.21.0",
+    "purescript": "^0.15.2"
   },
   "type": "module"
 }

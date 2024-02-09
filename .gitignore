@@ -79,3 +79,6 @@ releases
 dist
 .spago
 test.js
+
+#idea
+.idea

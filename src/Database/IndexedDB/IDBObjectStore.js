@@ -112,6 +112,22 @@ export function _delete(store, query) {
     };
 };
 
+export function _get(store, key) {
+  return function aff(error, success) {
+    try {
+      const request = store.get(key);
+      request.onsuccess = successHandler(success);
+      request.onerror = errorHandler(error);
+    } catch (e) {
+      error(e);
+    }
+
+    return function canceler(_, cancelerError) {
+        cancelerError(new Error("Can't cancel IDB Effects"));
+    };
+  };
+}
+
 export function _index(store, name) {
     return function aff(error, success) {
         try {
