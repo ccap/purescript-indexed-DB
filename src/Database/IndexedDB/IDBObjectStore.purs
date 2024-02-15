@@ -12,6 +12,7 @@ module Database.IndexedDB.IDBObjectStore
   , delete
   , deleteIndex
   , get
+  , getAll
   , index
   , put
 
@@ -160,6 +161,23 @@ get ::
 get store key =
   map (toMaybe >>> map unsafeFromForeign) (fromEffectFnAff $ Fn.runFn2 _get store key)
 
+-- | Gets all records in store with the given key range
+-- | If no key range is given then all records are retrieved
+-- | also takes a parameter to limit the number of record returned
+-- | if not supplied all records are returned
+getAll ::
+  forall val store
+  . IDBObjectStore store
+  => store
+  -> Maybe KeyRange
+  -> Maybe Int
+  -> Aff (Array val)
+getAll store keyRange count =
+  map
+    (map unsafeFromForeign)
+    (fromEffectFnAff $ Fn.runFn3 _getAll store (toNullable keyRange) (toNullable count))
+
+
 -- | Adds or updates a record in store with the given value and key.
 -- |
 -- | If the store uses in-line keys and key is specified a "DataError" DOMException
@@ -262,6 +280,10 @@ foreign import _name
 foreign import _get
   :: forall store
    . Fn2 store KeyRange (EffectFnAff (Nullable Foreign))
+
+foreign import _getAll
+  :: forall store
+  . Fn3 store (Nullable KeyRange) (Nullable Int) (EffectFnAff (Array Foreign))
 
 foreign import _put
   :: forall val store

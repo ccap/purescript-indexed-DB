@@ -128,6 +128,21 @@ export function _get(store, key) {
   };
 }
 
+export function _getAll(store, keyRange, count) {
+  return function aff(error, success) {
+    try {
+      const request = store.getAll(keyRange, count);
+      request.onsuccess = successHandler(success);
+      request.onerror = errorHandler(error);
+    } catch(e) {
+      error(e);
+    }
+    return function canceler(_, cancelerError) {
+      cancelerError(new Error("Can't cancel IDB Effects"));
+    };
+  };
+}
+
 export function _index(store, name) {
     return function aff(error, success) {
         try {
